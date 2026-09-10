@@ -1,0 +1,28 @@
+/**
+ * The admin session lives in localStorage, like Bridge's admin-app. The key is
+ * namespaced so a Railz Admin tab and a Bridge Admin tab on the same origin
+ * during local development never read each other's token.
+ */
+const TOKEN_KEY = 'railz_admin_token';
+
+const hasStorage = (): boolean => typeof window !== 'undefined';
+
+export const getToken = (): string | null =>
+  hasStorage() ? localStorage.getItem(TOKEN_KEY) : null;
+
+export const setToken = (token: string): void => {
+  if (hasStorage()) localStorage.setItem(TOKEN_KEY, token);
+};
+
+export const clearToken = (): void => {
+  if (hasStorage()) localStorage.removeItem(TOKEN_KEY);
+};
+
+/** Drop the session and land on /login (a hard navigation, so no state survives). */
+export const signOut = (): void => {
+  clearToken();
+  if (!hasStorage()) return;
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.replace('/login');
+  }
+};
