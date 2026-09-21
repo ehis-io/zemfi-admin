@@ -7,10 +7,19 @@ import { useAdmin } from './AdminContext';
 import { Button } from './ui/Button';
 import { humanize } from '../lib/format';
 
-const LINKS: { href: string; label: string; exact?: boolean }[] = [
+const LINKS: {
+  href: string;
+  label: string;
+  exact?: boolean;
+  /** Hidden from agents. The API refuses them too -- this only keeps a
+   * door they cannot open out of the way. */
+  ownerOnly?: boolean;
+}[] = [
   { href: '/dashboard', label: 'Overview', exact: true },
   { href: '/dashboard/users', label: 'Users' },
   { href: '/dashboard/support', label: 'Support' },
+  { href: '/dashboard/features', label: 'Features' },
+  { href: '/dashboard/admins', label: 'Admins', ownerOnly: true },
 ];
 
 const isActive = (pathname: string, link: (typeof LINKS)[number]): boolean =>
@@ -25,9 +34,11 @@ export function Sidebar() {
   const { admin, signOut } = useAdmin();
   const [open, setOpen] = useState(false);
 
+  const links = LINKS.filter((link) => !link.ownerOnly || admin.role === 'OWNER');
+
   const nav = (
     <nav className="flex flex-col gap-1">
-      {LINKS.map((link) => {
+      {links.map((link) => {
         const active = isActive(pathname, link);
         return (
           <Link

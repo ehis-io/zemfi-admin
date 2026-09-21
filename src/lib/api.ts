@@ -116,4 +116,10 @@ export const api = {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   },
+  patch<T>(endpoint: string, body?: unknown): Promise<T> {
+    return request<T>(endpoint, {
+      method: 'PATCH',
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  },
 };

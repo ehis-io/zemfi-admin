@@ -188,3 +188,59 @@ export const TICKET_STATUSES: readonly TicketStatus[] = [
   'RESOLVED',
   'CLOSED',
 ] as const;
+
+export type FeatureStatus = 'LIVE' | 'COMING_SOON' | 'OFF';
+
+export interface Feature {
+  key: string;
+  /** What the switch controls, in the backend's own words. */
+  label: string;
+  status: FeatureStatus;
+  /**
+   * Whether a request may proceed. Only LIVE does -- COMING_SOON is not a
+   * soft version of on, so this is not `status !== 'OFF'`.
+   */
+  enabled: boolean;
+  /** Shown to users while the capability is unavailable. */
+  message: string | null;
+  updatedBy: string | null;
+  updatedByName: string | null;
+  updatedAt: string | null;
+}
+
+export const FEATURE_STATUSES: readonly FeatureStatus[] = [
+  'LIVE',
+  'COMING_SOON',
+  'OFF',
+] as const;
+
+/** What each state means to an operator choosing between them. */
+export const FEATURE_STATUS_HINTS: Record<FeatureStatus, string> = {
+  LIVE: 'Working normally.',
+  COMING_SOON: 'Visible but not usable yet.',
+  OFF: 'Switched off — an outage or a pause.',
+};
+
+/** A staff account, as /admin/admins returns it. Never carries a hash. */
+export interface AdminAccount {
+  id: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  active: boolean;
+  lastLoginAt: string | null;
+  createdAt: string;
+}
+
+export const ADMIN_ROLES: readonly AdminRole[] = ['OWNER', 'AGENT'] as const;
+
+/** What each role may do, so the choice is not made on the word alone. */
+export const ADMIN_ROLE_HINTS: Record<AdminRole, string> = {
+  OWNER: 'Everything an agent can do, plus managing these accounts.',
+  AGENT: 'Support and operations: customers, tickets, switches.',
+};
+
+/** Matches the backend DTO; checked here so a too-short password is caught
+ * before it is sent anywhere. */
+export const MIN_ADMIN_PASSWORD_LENGTH = 12;
+

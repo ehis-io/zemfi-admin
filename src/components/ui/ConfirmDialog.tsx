@@ -10,6 +10,8 @@ export interface ConfirmDialogProps {
   confirmLabel?: string;
   tone?: 'danger' | 'primary';
   busy?: boolean;
+  /** For a dialog that collects something before it can be acted on. */
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -21,6 +23,7 @@ export function ConfirmDialog({
   confirmLabel = 'Confirm',
   tone = 'primary',
   busy = false,
+  confirmDisabled = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -45,7 +48,12 @@ export function ConfirmDialog({
           <Button variant="secondary" onClick={onCancel} disabled={busy}>
             Cancel
           </Button>
-          <Button variant={tone} onClick={onConfirm} isLoading={busy}>
+          <Button
+            variant={tone}
+            onClick={onConfirm}
+            isLoading={busy}
+            disabled={confirmDisabled}
+          >
             {confirmLabel}
           </Button>
         </div>
