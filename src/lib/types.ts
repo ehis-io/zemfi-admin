@@ -244,3 +244,86 @@ export const ADMIN_ROLE_HINTS: Record<AdminRole, string> = {
  * before it is sent anywhere. */
 export const MIN_ADMIN_PASSWORD_LENGTH = 12;
 
+// ---------------------------------------------------------------- KYC queue
+
+export interface KycQueueRecord {
+  id: string;
+  level: number;
+  status: KycStatus;
+  idType: string | null;
+  rejectionReason: string | null;
+  createdAt: string;
+}
+
+export interface KycQueueItem {
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    country: string;
+    dutchmanCustomerId: string | null;
+    kycCacheSyncedAt: string | null;
+    createdAt: string;
+  };
+  /** Only the records in the status being listed, oldest first. */
+  records: KycQueueRecord[];
+  /** When the oldest of those was raised -- how long they have waited. */
+  waitingSince: string;
+}
+
+export const KYC_QUEUE_STATUSES: readonly KycStatus[] = [
+  'REVIEW',
+  'PENDING',
+  'REJECTED',
+  'APPROVED',
+] as const;
+
+/** What each status means for the person waiting, not for Bridge. */
+export const KYC_STATUS_HINTS: Record<KycStatus, string> = {
+  REVIEW: 'Being checked — waiting on a decision.',
+  PENDING: 'Submitted, not yet picked up.',
+  REJECTED: 'Turned down. The customer must re-submit.',
+  APPROVED: 'Verified.',
+};
+
+// -------------------------------------------------------------- audit log
+
+export interface AuditEvent {
+  id: string;
+  /** Stable dotted key, e.g. `user.two_factor_reset`. */
+  action: string;
+  targetType: string;
+  targetId: string;
+  /** How the target read when it happened. */
+  targetLabel: string | null;
+  detail: Record<string, unknown> | null;
+  createdAt: string;
+  admin: { id: string; name: string; email: string } | null;
+}
+
+/** Plain-English readings of the actions the backend records. An action
+ * with no entry here falls back to its key, so a new one still shows. */
+export const AUDIT_ACTION_LABELS: Record<string, string> = {
+  'admin.signed_in': 'Signed in',
+  'admin.created': 'Added an admin',
+  'admin.updated': 'Changed an admin',
+  'admin.password_set': 'Set an admin password',
+  'user.two_factor_reset': 'Reset 2FA',
+  'user.kyc_refreshed': 'Refreshed KYC',
+  'ticket.replied': 'Replied to a ticket',
+  'ticket.status_changed': 'Changed a ticket status',
+  'feature.changed': 'Changed a switch',
+};
+
+/** Where a target can be opened, when the portal has a page for it. */
+export const auditTargetHref = (
+  targetType: string,
+  targetId: string,
+): string | null => {
+  if (targetType === 'user') return `/dashboard/users/${targetId}`;
+  if (targetType === 'ticket') return `/dashboard/support/${targetId}`;
+  if (targetType === 'feature') return '/dashboard/features';
+  return null;
+};
+

@@ -18,8 +18,10 @@ const LINKS: {
   { href: '/dashboard', label: 'Overview', exact: true },
   { href: '/dashboard/users', label: 'Users' },
   { href: '/dashboard/support', label: 'Support' },
+  { href: '/dashboard/kyc', label: 'KYC' },
   { href: '/dashboard/features', label: 'Features' },
   { href: '/dashboard/admins', label: 'Admins', ownerOnly: true },
+  { href: '/dashboard/audit', label: 'Audit', ownerOnly: true },
 ];
 
 const isActive = (pathname: string, link: (typeof LINKS)[number]): boolean =>

@@ -22,6 +22,8 @@ product — a Railz support agent never sees Bridge's control centre.
 | `/dashboard/support/[id]`  | Message thread, reply box, status select, link to the customer's user page                       |
 | `/dashboard/features`      | Railz's own switches: set each to Live / Coming soon / Off with the message customers are shown. Taking one away is confirmed first |
 | `/dashboard/admins`        | Staff accounts (owner-only): add an admin, change a role, deactivate/reactivate, set a password  |
+| `/dashboard/kyc`           | The verification backlog by status, longest-waiting first, each row opening the customer         |
+| `/dashboard/audit`         | What staff did (owner-only): filterable by action and admin, each target clickable               |
 
 ## Auth
 
