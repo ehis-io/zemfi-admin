@@ -221,6 +221,55 @@ export const FEATURE_STATUS_HINTS: Record<FeatureStatus, string> = {
   OFF: 'Switched off — an outage or a pause.',
 };
 
+/** The transaction kinds a Railz fee can be attached to. */
+export type FeeFlow = 'GLOBAL_SEND' | 'SELL' | 'BUY' | 'CRYPTO_SEND';
+
+/** `currency` on a rule that covers every currency its flow runs in. */
+export const ANY_CURRENCY = '*';
+
+/**
+ * What Railz charges on top of Dutchman Bridge's fee, as /admin/fees returns
+ * it. Amounts are numbers rather than strings: the backend has already turned
+ * its decimals into them, and the portal only displays and edits them.
+ */
+export interface FeeRule {
+  id: string;
+  flow: FeeFlow;
+  /** What the flow is, in the backend's own words. */
+  label: string;
+  /** ISO code, or `*` for every currency this flow runs in. */
+  currency: string;
+  /** Percentage part in basis points: 50 is 0.50%. */
+  feeBps: number;
+  /** Fixed part, in `currency`. */
+  feeFlat: number;
+  feeMin: number | null;
+  feeMax: number | null;
+  /**
+   * A rule charges nothing until this is true, whatever its numbers say.
+   * Turning it on is what starts billing customers.
+   */
+  active: boolean;
+  updatedBy: string | null;
+  updatedByName: string | null;
+  updatedAt: string | null;
+}
+
+export const FEE_FLOWS: readonly FeeFlow[] = [
+  'GLOBAL_SEND',
+  'SELL',
+  'BUY',
+  'CRYPTO_SEND',
+] as const;
+
+/** Enough for an operator to tell the flows apart when adding a rule. */
+export const FEE_FLOW_HINTS: Record<FeeFlow, string> = {
+  GLOBAL_SEND: 'Cross-border payouts.',
+  SELL: 'Selling crypto for local currency.',
+  BUY: 'Buying crypto with local currency.',
+  CRYPTO_SEND: 'On-chain transfers.',
+};
+
 /** A staff account, as /admin/admins returns it. Never carries a hash. */
 export interface AdminAccount {
   id: string;
@@ -324,6 +373,7 @@ export const auditTargetHref = (
   if (targetType === 'user') return `/dashboard/users/${targetId}`;
   if (targetType === 'ticket') return `/dashboard/support/${targetId}`;
   if (targetType === 'feature') return '/dashboard/features';
+  if (targetType === 'fee') return '/dashboard/fees';
   return null;
 };
 

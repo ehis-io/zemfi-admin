@@ -20,6 +20,7 @@ const LINKS: {
   { href: '/dashboard/support', label: 'Support' },
   { href: '/dashboard/kyc', label: 'KYC' },
   { href: '/dashboard/features', label: 'Features' },
+  { href: '/dashboard/fees', label: 'Fees', ownerOnly: true },
   { href: '/dashboard/admins', label: 'Admins', ownerOnly: true },
   { href: '/dashboard/audit', label: 'Audit', ownerOnly: true },
 ];
