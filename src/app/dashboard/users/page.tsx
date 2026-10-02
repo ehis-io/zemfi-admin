@@ -48,7 +48,7 @@ export default function UsersPage() {
 
   return (
     <>
-      <PageHeader title="Users" description="Everyone with a Railz account." />
+      <PageHeader title="Users" description="Everyone with a ZemFi account." />
 
       <form
         className="mb-4 flex gap-2"

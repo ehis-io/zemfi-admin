@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Railz Admin",
-    template: "%s | Railz Admin",
+    default: "ZemFi Admin",
+    template: "%s | ZemFi Admin",
   },
-  description: "Internal support and operations console for Railz.",
+  description: "Internal support and operations console for ZemFi.",
 };
 
 export default function RootLayout({

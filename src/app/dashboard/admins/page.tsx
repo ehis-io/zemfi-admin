@@ -156,7 +156,7 @@ export default function AdminsPage() {
             name="new-admin-email"
             type="email"
             autoComplete="off"
-            placeholder="ops@railz.example"
+            placeholder="ops@zemfi.example"
             value={form.email}
             onChange={(event) => setForm({ ...form, email: event.target.value })}
           />

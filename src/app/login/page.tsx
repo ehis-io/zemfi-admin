@@ -41,7 +41,7 @@ export default function LoginPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-lg font-bold text-white shadow-lg shadow-primary/30">
             R
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Railz Admin</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">ZemFi Admin</h1>
           <p className="mt-1 text-xs font-bold uppercase tracking-widest text-muted">Support console</p>
         </div>
 
@@ -50,7 +50,7 @@ export default function LoginPage() {
             label="Email"
             name="email"
             type="email"
-            placeholder="you@railz.app"
+            placeholder="you@zemfi.app"
             required
             autoComplete="username"
             value={email}

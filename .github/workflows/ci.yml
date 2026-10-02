@@ -1,4 +1,4 @@
-name: Railz Admin CI
+name: ZemFi Admin CI
 
 on:
   push:

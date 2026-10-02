@@ -221,14 +221,14 @@ export const FEATURE_STATUS_HINTS: Record<FeatureStatus, string> = {
   OFF: 'Switched off — an outage or a pause.',
 };
 
-/** The transaction kinds a Railz fee can be attached to. */
+/** The transaction kinds a ZemFi fee can be attached to. */
 export type FeeFlow = 'GLOBAL_SEND' | 'SELL' | 'BUY' | 'CRYPTO_SEND';
 
 /** `currency` on a rule that covers every currency its flow runs in. */
 export const ANY_CURRENCY = '*';
 
 /**
- * What Railz charges on top of Dutchman Bridge's fee, as /admin/fees returns
+ * What ZemFi charges on top of Dutchman Bridge's fee, as /admin/fees returns
  * it. Amounts are numbers rather than strings: the backend has already turned
  * its decimals into them, and the portal only displays and edits them.
  */

@@ -112,7 +112,7 @@ function Brand() {
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white shadow-lg shadow-primary/30">
         R
       </span>
-      <span className="text-sm font-semibold tracking-tight text-foreground">Railz Admin</span>
+      <span className="text-sm font-semibold tracking-tight text-foreground">ZemFi Admin</span>
     </Link>
   );
 }

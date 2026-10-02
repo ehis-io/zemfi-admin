@@ -25,7 +25,7 @@ const PAGE_SIZE = 25;
  * support queue uses, for the same reason: whoever has been stuck longest
  * is who to look at.
  *
- * Read from Railz's cache of Bridge's KYC state, which is what the
+ * Read from ZemFi's cache of Bridge's KYC state, which is what the
  * customer's own app is being shown. A row that looks wrong is one Refresh
  * away on the user's page, and the page says so rather than leaving an
  * agent wondering whether they are looking at something stale.

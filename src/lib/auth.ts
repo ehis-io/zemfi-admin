@@ -1,6 +1,6 @@
 /**
  * The admin session lives in localStorage, like Bridge's admin-app. The key is
- * namespaced so a Railz Admin tab and a Bridge Admin tab on the same origin
+ * namespaced so a ZemFi Admin tab and a Bridge Admin tab on the same origin
  * during local development never read each other's token.
  */
 const TOKEN_KEY = 'railz_admin_token';

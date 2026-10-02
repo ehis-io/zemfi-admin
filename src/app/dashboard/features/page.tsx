@@ -43,7 +43,7 @@ const isDirty = (feature: Feature, draft: Draft): boolean =>
   (messageFor(draft) ?? null) !== (feature.message ?? null);
 
 /**
- * Railz's own kill switches. The backend has served these all along
+ * ZemFi's own kill switches. The backend has served these all along
  * (GET/PATCH /admin/features); until this page existed, throwing one meant
  * calling the API by hand, which is not something to be doing during an
  * incident.

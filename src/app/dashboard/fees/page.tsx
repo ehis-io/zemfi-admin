@@ -85,7 +85,7 @@ const describe = (draft: Draft, currency: string): string => {
 };
 
 /**
- * Railz's own fees, charged on top of whatever Dutchman Bridge charges.
+ * ZemFi's own fees, charged on top of whatever Dutchman Bridge charges.
  *
  * A rule does nothing until it is switched on, and every rule is created off
  * at zero — so this page is safe to open and edit, and only the "Charge this"
@@ -200,7 +200,7 @@ export default function FeesPage() {
     <>
       <PageHeader
         title="Fees"
-        description="What Railz charges on top of Dutchman Bridge's own fee. Changes reach every customer immediately."
+        description="What ZemFi charges on top of Dutchman Bridge's own fee. Changes reach every customer immediately."
       />
 
       {charging.length > 0 && (
@@ -259,7 +259,7 @@ export default function FeesPage() {
       <Card>
         {rules.length === 0 ? (
           <EmptyState>
-            No fees configured. Railz charges nothing beyond Bridge&apos;s own fee.
+            No fees configured. ZemFi charges nothing beyond Bridge&apos;s own fee.
           </EmptyState>
         ) : (
           <ul className="divide-y divide-surface-border">
