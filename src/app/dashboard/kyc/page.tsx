@@ -231,14 +231,20 @@ export default function KycPage() {
                         {fullName(bill.user)}
                       </p>
                       <p className="text-xs text-muted">{bill.user.email}</p>
-                      <a
-                        className="text-xs text-primary-soft underline"
-                        href={bill.utilityBillUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open uploaded bill
-                      </a>
+                      {bill.documentUrl ? (
+                        <a
+                          className="text-xs text-primary-soft underline"
+                          href={bill.documentUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open uploaded bill
+                        </a>
+                      ) : (
+                        <p className="text-xs text-warning">
+                          This bill has no Railz copy. Ask the customer to upload it again.
+                        </p>
+                      )}
                     </div>
                     <label className="flex flex-col gap-1 text-xs text-muted">
                       Date printed on bill

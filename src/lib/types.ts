@@ -324,6 +324,7 @@ export interface KycQueueItem {
 export interface PendingAddressBill {
   id: string;
   utilityBillUrl: string;
+  documentUrl: string | null;
   createdAt: string;
   user: {
     id: string;
