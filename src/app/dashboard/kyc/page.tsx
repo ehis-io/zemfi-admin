@@ -14,6 +14,7 @@ import {
   KYC_QUEUE_STATUSES,
   KYC_STATUS_HINTS,
   type KycQueueItem,
+  type PendingAddressBill,
   type KycStatus,
   type Page,
 } from '../../../lib/types';
@@ -34,6 +35,9 @@ export default function KycPage() {
   const [status, setStatus] = useState<KycStatus>('REVIEW');
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState<string | null>(null);
+  const [billDates, setBillDates] = useState<Record<string, string>>({});
+  const [savingBill, setSavingBill] = useState<string | null>(null);
+  const [billError, setBillError] = useState<string | null>(null);
 
   const loadQueue = useCallback(
     () => api.get<Page<KycQueueItem>>(`/admin/kyc${query({ status, limit: PAGE_SIZE })}`),
@@ -46,6 +50,17 @@ export default function KycPage() {
     [],
   );
   const { data: counts } = useRequest(loadCounts, 'Could not load the counts.');
+
+  const loadPendingBills = useCallback(
+    () => api.get<PendingAddressBill[]>('/admin/kyc/address-bills/pending'),
+    [],
+  );
+  const {
+    data: pendingBills,
+    error: pendingBillsError,
+    loading: pendingBillsLoading,
+    setData: setPendingBills,
+  } = useRequest(loadPendingBills, 'Could not load bills awaiting date review.');
 
   const items = page?.items ?? [];
   const nextCursor = page?.nextCursor ?? null;
@@ -63,6 +78,23 @@ export default function KycPage() {
       setMoreError(friendlyErrorMessage(err, 'Could not load more.'));
     } finally {
       setIsLoadingMore(false);
+    }
+  };
+
+  const enterBillDate = async (bill: PendingAddressBill) => {
+    const utilityBillDate = billDates[bill.id];
+    if (!utilityBillDate) return;
+    setSavingBill(bill.id);
+    setBillError(null);
+    try {
+      await api.post(`/admin/kyc/address-bills/${bill.id}/date`, {
+        utilityBillDate,
+      });
+      setPendingBills((current) => current.filter((item) => item.id !== bill.id));
+    } catch (err: unknown) {
+      setBillError(friendlyErrorMessage(err, 'Could not save the bill date.'));
+    } finally {
+      setSavingBill(null);
     }
   };
 
@@ -173,6 +205,69 @@ export default function KycPage() {
             </Button>
           </div>
         )}
+      </Card>
+
+      <Card title="Address bills awaiting date review" className="mt-6">
+        <div className="p-5">
+          <p className="mb-4 text-sm text-muted">
+            Open each bill, read its printed date, and enter that date here.
+            Railz stores the compliance entry and supplies it to Bridge when the
+            customer submits the address check.
+          </p>
+          {pendingBillsLoading ? (
+            <Spinner />
+          ) : pendingBillsError ? (
+            <Alert>{pendingBillsError}</Alert>
+          ) : (pendingBills ?? []).length === 0 ? (
+            <EmptyState>No address bills are waiting for a date.</EmptyState>
+          ) : (
+            <>
+              {billError && <Alert className="mb-4">{billError}</Alert>}
+              <ul className="divide-y divide-surface-border">
+                {(pendingBills ?? []).map((bill) => (
+                  <li key={bill.id} className="flex flex-wrap items-center gap-3 py-4">
+                    <div className="min-w-48 flex-1">
+                      <p className="font-medium text-foreground">
+                        {fullName(bill.user)}
+                      </p>
+                      <p className="text-xs text-muted">{bill.user.email}</p>
+                      <a
+                        className="text-xs text-primary-soft underline"
+                        href={bill.utilityBillUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open uploaded bill
+                      </a>
+                    </div>
+                    <label className="flex flex-col gap-1 text-xs text-muted">
+                      Date printed on bill
+                      <input
+                        className="rounded border border-surface-border bg-surface px-3 py-2 text-sm text-foreground"
+                        type="date"
+                        value={billDates[bill.id] ?? ''}
+                        onChange={(event) =>
+                          setBillDates((current) => ({
+                            ...current,
+                            [bill.id]: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <Button
+                      size="sm"
+                      onClick={() => enterBillDate(bill)}
+                      isLoading={savingBill === bill.id}
+                      disabled={!billDates[bill.id] || savingBill !== null}
+                    >
+                      Save date
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
       </Card>
     </>
   );
