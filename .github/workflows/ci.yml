@@ -29,4 +29,4 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          NEXT_PUBLIC_RAILZ_API_URL: https://railz.dutchmannetwork.online/api/v1
+          NEXT_PUBLIC_RAILZ_API_URL: https://app.zemfi.ng/api/v1

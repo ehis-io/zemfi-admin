@@ -2,7 +2,7 @@ import { getToken, signOut } from './auth';
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_RAILZ_API_URL ||
-  'https://railz.dutchmannetwork.online/api/v1';
+  'https://app.zemfi.ng/api/v1';
 
 /** Every successful railz-backend response: the payload is under `data`. */
 interface Envelope<T> {

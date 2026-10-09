@@ -37,7 +37,7 @@ API clears the token and returns the browser to `/login`.
 
 | Variable                    | Purpose                                                                            |
 | --------------------------- | ---------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_RAILZ_API_URL` | Base URL of railz-backend's API. Defaults to `https://railz.dutchmannetwork.online/api/v1`. |
+| `NEXT_PUBLIC_RAILZ_API_URL` | Base URL of railz-backend's API. Defaults to `https://app.zemfi.ng/api/v1`. |
 
 Copy `.env.example` to `.env.local` for local development. Because the value is
 inlined at build time (`NEXT_PUBLIC_*`), rebuild after changing it.
@@ -66,7 +66,7 @@ state, so build it with the production API URL set and serve the output with
 runs Next.js.
 
 ```bash
-NEXT_PUBLIC_RAILZ_API_URL=https://railz.dutchmannetwork.online/api/v1 npm run build
+NEXT_PUBLIC_RAILZ_API_URL=https://app.zemfi.ng/api/v1 npm run build
 npm start
 ```
 
