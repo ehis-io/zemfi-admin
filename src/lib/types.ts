@@ -321,20 +321,6 @@ export interface KycQueueItem {
   waitingSince: string;
 }
 
-export interface PendingAddressBill {
-  id: string;
-  utilityBillUrl: string;
-  documentUrl: string | null;
-  createdAt: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    dutchmanCustomerId: string | null;
-  };
-}
-
 export const KYC_QUEUE_STATUSES: readonly KycStatus[] = [
   'REVIEW',
   'PENDING',
@@ -390,3 +376,4 @@ export const auditTargetHref = (
   if (targetType === 'fee') return '/dashboard/fees';
   return null;
 };
+
