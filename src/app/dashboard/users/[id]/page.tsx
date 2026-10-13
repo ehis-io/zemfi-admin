@@ -26,6 +26,28 @@ import type {
 
 const WITHDRAWALS_PAGE = 20;
 
+/** One international enrolment group, as Bridge reports it. */
+interface InternationalGroup {
+  key: string;
+  status: string;
+  reason: string | null;
+  countries: string[];
+  optedInCountries?: string[];
+}
+
+const GROUP_LABEL: Record<string, string> = {
+  americas_europe: 'US, Europe & Americas',
+  china: 'China',
+};
+
+/** Groups whose partner can be sent the details again from here. */
+const RESENDABLE_GROUPS = new Set(['china']);
+
+const asGroups = (value: unknown): InternationalGroup[] => {
+  const groups = (value as { groups?: unknown } | null)?.groups;
+  return Array.isArray(groups) ? (groups as InternationalGroup[]) : [];
+};
+
 /**
  * The backend types the Bridge-side reverification as `unknown`; render it
  * only when it happens to have the same shape as the user's own record.
@@ -49,6 +71,19 @@ export default function UserDetailPage() {
   const [confirmReset, setConfirmReset] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [resendGroup, setResendGroup] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+
+  const loadInternational = useCallback(
+    () => api.get<unknown>(`/admin/users/${id}/international`),
+    [id],
+  );
+  const {
+    data: international,
+    error: internationalError,
+    setData: setInternational,
+  } = useRequest(loadInternational, 'Could not load international verification.');
+  const groups = asGroups(international);
 
   const loadDetail = useCallback(() => api.get<UserDetail>(`/admin/users/${id}`), [id]);
   const {
@@ -104,6 +139,25 @@ export default function UserDetailPage() {
       toast.error(friendlyErrorMessage(err, 'Could not reset two-factor authentication.'));
     } finally {
       setResetting(false);
+    }
+  };
+
+  // Have Bridge send the user's address, document and selfie to the group's
+  // partner again, when it reports them missing and the user cannot re-submit.
+  const resendInternational = async () => {
+    if (!resendGroup) return;
+    setResending(true);
+    try {
+      const result = await api.post<unknown>(
+        `/admin/users/${id}/international/${resendGroup}/resend`,
+      );
+      setInternational(() => result);
+      toast.success('Verification details re-sent.');
+      setResendGroup(null);
+    } catch (err: unknown) {
+      toast.error(friendlyErrorMessage(err, 'Could not re-send the details.'));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -251,6 +305,54 @@ export default function UserDetailPage() {
             </Table>
           </Card>
 
+          <Card title="International verification">
+            {internationalError ? (
+              <div className="p-5">
+                <Alert>{internationalError}</Alert>
+              </div>
+            ) : (
+              <Table minWidth={560}>
+                <THead>
+                  <Th>Destinations</Th>
+                  <Th>Status</Th>
+                  <Th>Reason</Th>
+                  <Th>Opted into</Th>
+                  <Th className="text-right">Action</Th>
+                </THead>
+                <TBody>
+                  {groups.length === 0 && (
+                    <TableMessage colSpan={5}>
+                      {international ? 'No international enrolment.' : 'Loading…'}
+                    </TableMessage>
+                  )}
+                  {groups.map((group) => (
+                    <Tr key={group.key}>
+                      <Td className="font-medium">{GROUP_LABEL[group.key] ?? humanize(group.key)}</Td>
+                      <Td>
+                        <StatusBadge status={group.status} />
+                      </Td>
+                      <Td className="text-muted">{group.reason ?? '—'}</Td>
+                      <Td className="text-muted">
+                        {group.optedInCountries?.length ? group.optedInCountries.join(', ') : '—'}
+                      </Td>
+                      <Td className="text-right">
+                        {RESENDABLE_GROUPS.has(group.key) &&
+                        group.status !== 'APPROVED' &&
+                        group.status !== 'NOT_STARTED' ? (
+                          <Button variant="secondary" onClick={() => setResendGroup(group.key)}>
+                            Resend details
+                          </Button>
+                        ) : (
+                          '—'
+                        )}
+                      </Td>
+                    </Tr>
+                  ))}
+                </TBody>
+              </Table>
+            )}
+          </Card>
+
           {bridge && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <Card title="Balances">
@@ -383,6 +485,22 @@ export default function UserDetailPage() {
         busy={resetting}
         onConfirm={resetTwoFactor}
         onCancel={() => setConfirmReset(false)}
+      />
+      <ConfirmDialog
+        open={resendGroup !== null}
+        title="Re-send verification details?"
+        description={
+          <>
+            Sends <strong>{fullName(user)}</strong>&apos;s residential address, ID document and selfie to our{' '}
+            {GROUP_LABEL[resendGroup ?? ''] ?? 'international'} payout partner again, to complete their review. No fee
+            is charged.
+          </>
+        }
+        confirmLabel="Re-send"
+        tone="primary"
+        busy={resending}
+        onConfirm={resendInternational}
+        onCancel={() => setResendGroup(null)}
       />
     </>
   );
