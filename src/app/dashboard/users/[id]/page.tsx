@@ -38,7 +38,8 @@ interface InternationalGroup {
 
 const GROUP_LABEL: Record<string, string> = {
   americas_europe: 'US, Europe & Americas',
-  china: 'China',
+  // One partner's verification, covering much more than China.
+  china: 'Africa, Asia & more',
 };
 
 /** Groups whose partner can be sent the details again from here. */
