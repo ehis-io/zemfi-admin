@@ -75,6 +75,9 @@ export default function UserDetailPage() {
   const [resendGroup, setResendGroup] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendPostalCode, setResendPostalCode] = useState('');
+  const [rejectGroup, setRejectGroup] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
 
   const loadInternational = useCallback(
     () => api.get<unknown>(`/admin/users/${id}/international`),
@@ -163,6 +166,32 @@ export default function UserDetailPage() {
       toast.error(friendlyErrorMessage(err, 'Could not re-send the details.'));
     } finally {
       setResending(false);
+    }
+  };
+
+  // Send the enrolment back to the user to fix and re-submit from the app;
+  // they read `rejectReason` there until they do.
+  const rejectInternational = async () => {
+    if (!rejectGroup) return;
+    const reason = rejectReason.trim();
+    if (reason.length < 5) {
+      toast.error('Say what the user needs to fix.');
+      return;
+    }
+    setRejecting(true);
+    try {
+      const result = await api.post<unknown>(
+        `/admin/users/${id}/international/${rejectGroup}/reject`,
+        { reason },
+      );
+      setInternational(() => result);
+      toast.success('Sent back to the user to fix.');
+      setRejectGroup(null);
+      setRejectReason('');
+    } catch (err: unknown) {
+      toast.error(friendlyErrorMessage(err, 'Could not send it back.'));
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -341,12 +370,25 @@ export default function UserDetailPage() {
                         {group.optedInCountries?.length ? group.optedInCountries.join(', ') : '—'}
                       </Td>
                       <Td className="text-right">
-                        {RESENDABLE_GROUPS.has(group.key) &&
-                        group.status !== 'APPROVED' &&
-                        group.status !== 'NOT_STARTED' ? (
-                          <Button variant="secondary" onClick={() => setResendGroup(group.key)}>
-                            Resend details
-                          </Button>
+                        {group.status !== 'APPROVED' && group.status !== 'NOT_STARTED' ? (
+                          <div className="flex justify-end gap-2">
+                            {RESENDABLE_GROUPS.has(group.key) && (
+                              <Button variant="secondary" onClick={() => setResendGroup(group.key)}>
+                                Resend details
+                              </Button>
+                            )}
+                            <Button
+                              variant="danger"
+                              onClick={() => {
+                                setRejectGroup(group.key);
+                                setRejectReason(
+                                  'Add your postal code to your address, then submit your verification again.',
+                                );
+                              }}
+                            >
+                              Reject
+                            </Button>
+                          </div>
                         ) : (
                           '—'
                         )}
@@ -490,6 +532,40 @@ export default function UserDetailPage() {
         busy={resetting}
         onConfirm={resetTwoFactor}
         onCancel={() => setConfirmReset(false)}
+      />
+      <ConfirmDialog
+        open={rejectGroup !== null}
+        title="Send back to the user to fix?"
+        description={
+          <>
+            <strong>{fullName(user)}</strong> will see this in the app with the form to submit their{' '}
+            {GROUP_LABEL[rejectGroup ?? ''] ?? 'international'} verification again. It clears when they do.
+            <div className="mt-4">
+              <label
+                htmlFor="reject-reason"
+                className="text-xs font-semibold uppercase tracking-wider text-muted"
+              >
+                What they need to fix
+              </label>
+              <textarea
+                id="reject-reason"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                maxLength={300}
+                rows={3}
+                className="input-field mt-1 w-full"
+              />
+            </div>
+          </>
+        }
+        confirmLabel="Reject"
+        tone="danger"
+        busy={rejecting}
+        onConfirm={rejectInternational}
+        onCancel={() => {
+          setRejectGroup(null);
+          setRejectReason('');
+        }}
       />
       <ConfirmDialog
         open={resendGroup !== null}
