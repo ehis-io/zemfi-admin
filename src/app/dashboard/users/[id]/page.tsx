@@ -7,6 +7,7 @@ import { PageHeader } from '../../../../components/PageHeader';
 import { Card, DefinitionList } from '../../../../components/ui/Card';
 import { Badge, StatusBadge } from '../../../../components/ui/Badge';
 import { Button } from '../../../../components/ui/Button';
+import { Input } from '../../../../components/ui/Input';
 import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
 import { Alert, EmptyState, Spinner } from '../../../../components/ui/Feedback';
 import { Table, TBody, Td, Th, THead, Tr, TableMessage } from '../../../../components/ui/Table';
@@ -73,6 +74,7 @@ export default function UserDetailPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [resendGroup, setResendGroup] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
+  const [resendPostalCode, setResendPostalCode] = useState('');
 
   const loadInternational = useCallback(
     () => api.get<unknown>(`/admin/users/${id}/international`),
@@ -148,12 +150,15 @@ export default function UserDetailPage() {
     if (!resendGroup) return;
     setResending(true);
     try {
+      const postalCode = resendPostalCode.trim();
       const result = await api.post<unknown>(
         `/admin/users/${id}/international/${resendGroup}/resend`,
+        postalCode ? { postalCode } : {},
       );
       setInternational(() => result);
       toast.success('Verification details re-sent.');
       setResendGroup(null);
+      setResendPostalCode('');
     } catch (err: unknown) {
       toast.error(friendlyErrorMessage(err, 'Could not re-send the details.'));
     } finally {
@@ -494,13 +499,26 @@ export default function UserDetailPage() {
             Sends <strong>{fullName(user)}</strong>&apos;s residential address, ID document and selfie to our{' '}
             {GROUP_LABEL[resendGroup ?? ''] ?? 'international'} payout partner again, to complete their review. No fee
             is charged.
+            <div className="mt-4">
+              <Input
+                label="Postal code (if the partner asks for one)"
+                name="resend-postal-code"
+                value={resendPostalCode}
+                onChange={(e) => setResendPostalCode(e.target.value)}
+                placeholder="e.g. 100001 — confirm it with the customer"
+                maxLength={16}
+              />
+            </div>
           </>
         }
         confirmLabel="Re-send"
         tone="primary"
         busy={resending}
         onConfirm={resendInternational}
-        onCancel={() => setResendGroup(null)}
+        onCancel={() => {
+          setResendGroup(null);
+          setResendPostalCode('');
+        }}
       />
     </>
   );
