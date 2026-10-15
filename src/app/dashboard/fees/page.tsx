@@ -200,7 +200,7 @@ export default function FeesPage() {
     <>
       <PageHeader
         title="Fees"
-        description="What ZemFi charges on top of Dutchman Bridge's own fee. Changes reach every customer immediately."
+        description="What ZemFi charges on top of our payments partner's own fee. Changes reach every customer immediately."
       />
 
       {charging.length > 0 && (
@@ -259,7 +259,7 @@ export default function FeesPage() {
       <Card>
         {rules.length === 0 ? (
           <EmptyState>
-            No fees configured. ZemFi charges nothing beyond Bridge&apos;s own fee.
+            No fees configured. ZemFi charges nothing beyond our payments partner&apos;s own fee.
           </EmptyState>
         ) : (
           <ul className="divide-y divide-surface-border">
@@ -368,7 +368,7 @@ export default function FeesPage() {
             <>
               <p>
                 Every {confirming.currency === ANY_CURRENCY ? '' : `${confirming.currency} `}
-                transaction of this kind is charged immediately, on top of Bridge&apos;s own fee.
+                transaction of this kind is charged immediately, on top of our payments partner&apos;s own fee.
               </p>
               <p className="mt-2">
                 They will pay:{' '}

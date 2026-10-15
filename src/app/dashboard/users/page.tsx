@@ -79,7 +79,7 @@ export default function UsersPage() {
             <Th>Email</Th>
             <Th>Phone</Th>
             <Th>Country</Th>
-            <Th>Bridge</Th>
+            <Th>Partner</Th>
             <Th>2FA</Th>
             <Th className="text-right">Joined</Th>
           </THead>

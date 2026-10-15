@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
   const tiles: { label: string; value: number; hint?: string }[] = [
     { label: 'Users', value: stats.users },
-    { label: 'Linked to Bridge', value: stats.usersLinkedToBridge, hint: 'have a Bridge customer' },
+    { label: 'Linked to partner', value: stats.usersLinkedToBridge, hint: 'have a payments partner account' },
     { label: '2FA enabled', value: stats.twoFactorEnabled },
     { label: 'New in 7 days', value: stats.newUsersLast7Days },
     { label: 'Open tickets', value: stats.tickets.open },

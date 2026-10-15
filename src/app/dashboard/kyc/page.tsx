@@ -152,7 +152,7 @@ export default function KycPage() {
 
                   {!item.user.dutchmanCustomerId && (
                     <p className="mt-2 text-xs text-warning">
-                      Not linked to a Bridge customer.
+                      Not linked to a payments partner account.
                     </p>
                   )}
                   <p className="mt-1 text-xs text-muted">

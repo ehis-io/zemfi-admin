@@ -211,7 +211,7 @@ export default function UserDetailPage() {
         },
       }));
       await reloadDetail();
-      toast.success('KYC records refreshed from Bridge.');
+      toast.success('KYC records refreshed from our payments partner.');
     } catch (err: unknown) {
       toast.error(friendlyErrorMessage(err, 'Could not refresh KYC.'));
     } finally {
@@ -256,7 +256,7 @@ export default function UserDetailPage() {
               onClick={refreshKyc}
               isLoading={refreshing}
               disabled={!user.dutchmanCustomerId}
-              title={user.dutchmanCustomerId ? undefined : 'This user has no Bridge customer yet.'}
+              title={user.dutchmanCustomerId ? undefined : 'This user has no payments partner account yet.'}
             >
               Refresh KYC
             </Button>
@@ -280,7 +280,7 @@ export default function UserDetailPage() {
                   value: user.twoFactorEnabled ? <Badge tone="info">Enabled</Badge> : <Badge>Disabled</Badge>,
                 },
                 {
-                  label: 'Bridge customer',
+                  label: 'Partner customer ID',
                   value: user.dutchmanCustomerId ? (
                     <span className="font-mono text-xs">{user.dutchmanCustomerId}</span>
                   ) : (
@@ -297,7 +297,7 @@ export default function UserDetailPage() {
         <div className="space-y-6 lg:col-span-2">
           {bridgeError && (
             <Alert tone="warning">
-              <span className="font-semibold">Bridge unavailable:</span> {bridgeError}
+              <span className="font-semibold">Payments partner unavailable:</span> {bridgeError}
               {user.kycRecords && ' Showing the last cached KYC records.'}
             </Alert>
           )}
