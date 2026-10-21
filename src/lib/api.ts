@@ -1,10 +1,10 @@
 import { getToken, signOut } from './auth';
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_RAILZ_API_URL ||
+  process.env.NEXT_PUBLIC_ZEMFI_API_URL ||
   'https://app.zemfi.ng/api/v1';
 
-/** Every successful railz-backend response: the payload is under `data`. */
+/** Every successful zemfi-backend response: the payload is under `data`. */
 interface Envelope<T> {
   status: string;
   message: string;

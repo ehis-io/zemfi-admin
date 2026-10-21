@@ -1,5 +1,5 @@
 /**
- * Types for railz-backend's admin API. This file is the client-side copy of
+ * Types for zemfi-backend's admin API. This file is the client-side copy of
  * the contract; nothing here is inferred from responses, so if the backend
  * adds a field it must be added here too before the UI can read it.
  */

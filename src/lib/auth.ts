@@ -2,6 +2,9 @@
  * The admin session lives in localStorage, like Bridge's admin-app. The key is
  * namespaced so a ZemFi Admin tab and a Bridge Admin tab on the same origin
  * during local development never read each other's token.
+ *
+ * The key keeps the project's former name (Railz) on purpose: renaming it
+ * would sign every admin out, since their token is stored under it.
  */
 const TOKEN_KEY = 'railz_admin_token';
 

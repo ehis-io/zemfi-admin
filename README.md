@@ -1,7 +1,7 @@
 # ZemFi Admin
 
 Internal support and operations console for **ZemFi** (the consumer product).
-It is a thin client over [railz-backend](https://github.com/Dutchman-io/railz-backend)'s
+It is a thin client over [zemfi-backend](https://github.com/Dutchman-io/railz-backend)'s
 admin API (`/admin/*`): user lookup with Bridge-side KYC/wallet state,
 withdrawals, 2FA reset, KYC refresh, and the support inbox. It holds no data of
 its own.
@@ -28,16 +28,21 @@ product — a ZemFi support agent never sees Bridge's control centre.
 ## Auth
 
 The access token from `/admin/auth/login` is kept in `localStorage`
-(`railz_admin_token`) and sent as `Authorization: Bearer …`. Every
+(`railz_admin_token` -- the project's former name, kept so a rename does not
+sign every admin out) and sent as `Authorization: Bearer …`. Every
 `/dashboard/*` page is wrapped by a client-side `RequireAdmin` guard that
 verifies the token with `GET /admin/me` before rendering; any `401` from the
 API clears the token and returns the browser to `/login`.
 
 ## Environment
 
-| Variable                    | Purpose                                                                            |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_RAILZ_API_URL` | Base URL of railz-backend's API. Defaults to `https://app.zemfi.ng/api/v1`. |
+| Variable                    | Purpose                                                                     |
+| --------------------------- | --------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_ZEMFI_API_URL` | Base URL of zemfi-backend's API. Defaults to `https://app.zemfi.ng/api/v1`. |
+
+(`NEXT_PUBLIC_ZEMFI_API_URL` was `NEXT_PUBLIC_RAILZ_API_URL` before the
+project was renamed; a host that still sets the old name falls back to the
+default.)
 
 Copy `.env.example` to `.env.local` for local development. Because the value is
 inlined at build time (`NEXT_PUBLIC_*`), rebuild after changing it.
@@ -66,7 +71,7 @@ state, so build it with the production API URL set and serve the output with
 runs Next.js.
 
 ```bash
-NEXT_PUBLIC_RAILZ_API_URL=https://app.zemfi.ng/api/v1 npm run build
+NEXT_PUBLIC_ZEMFI_API_URL=https://app.zemfi.ng/api/v1 npm run build
 npm start
 ```
 
