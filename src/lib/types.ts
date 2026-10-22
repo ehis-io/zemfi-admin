@@ -228,7 +228,7 @@ export type FeeFlow = 'GLOBAL_SEND' | 'SELL' | 'BUY' | 'CRYPTO_SEND';
 export const ANY_CURRENCY = '*';
 
 /**
- * What ZemFi charges on top of Dutchman Bridge's fee, as /admin/fees returns
+ * What ZemFi charges on top of the payments partner's fee, as /admin/fees returns
  * it. Amounts are numbers rather than strings: the backend has already turned
  * its decimals into them, and the portal only displays and edits them.
  */
@@ -328,7 +328,7 @@ export const KYC_QUEUE_STATUSES: readonly KycStatus[] = [
   'APPROVED',
 ] as const;
 
-/** What each status means for the person waiting, not for Bridge. */
+/** What each status means for the person waiting, not for the partner. */
 export const KYC_STATUS_HINTS: Record<KycStatus, string> = {
   REVIEW: 'Being checked — waiting on a decision.',
   PENDING: 'Submitted, not yet picked up.',

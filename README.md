@@ -2,7 +2,7 @@
 
 Internal support and operations console for **ZemFi** (the consumer product).
 It is a thin client over [zemfi-backend](https://github.com/Dutchman-io/railz-backend)'s
-admin API (`/admin/*`): user lookup with Bridge-side KYC/wallet state,
+admin API (`/admin/*`): user lookup with partner-side KYC/wallet state,
 withdrawals, 2FA reset, KYC refresh, and the support inbox. It holds no data of
 its own.
 
@@ -17,7 +17,7 @@ product — a ZemFi support agent never sees Bridge's control centre.
 | `/login`                   | Email + password → `POST /admin/auth/login`                                                       |
 | `/dashboard`               | Stat tiles (`GET /admin/stats`) and the latest open tickets                                       |
 | `/dashboard/users`         | Searchable user list with cursor paging                                                           |
-| `/dashboard/users/[id]`    | Profile, Bridge snapshot (KYC records, balances, deposit addresses, virtual account), withdrawals; Reset 2FA and Refresh KYC actions |
+| `/dashboard/users/[id]`    | Profile, payments partner snapshot (KYC records, balances, deposit addresses, virtual account), withdrawals; Reset 2FA and Refresh KYC actions |
 | `/dashboard/support`       | Tickets by status tab, with customer and last-message preview                                     |
 | `/dashboard/support/[id]`  | Message thread, reply box, status select, link to the customer's user page                       |
 | `/dashboard/features`      | ZemFi's own switches: set each to Live / Coming soon / Off with the message customers are shown. Taking one away is confirmed first |

@@ -27,7 +27,7 @@ import type {
 
 const WITHDRAWALS_PAGE = 20;
 
-/** One international enrolment group, as Bridge reports it. */
+/** One international enrolment group, as the payments partner reports it. */
 interface InternationalGroup {
   key: string;
   status: string;
@@ -51,7 +51,7 @@ const asGroups = (value: unknown): InternationalGroup[] => {
 };
 
 /**
- * The backend types the Bridge-side reverification as `unknown`; render it
+ * The backend types the partner-side reverification as `unknown`; render it
  * only when it happens to have the same shape as the user's own record.
  */
 const asReverification = (value: unknown): KycReverification | null => {
@@ -148,8 +148,8 @@ export default function UserDetailPage() {
     }
   };
 
-  // Have Bridge send the user's address, document and selfie to the group's
-  // partner again, when it reports them missing and the user cannot re-submit.
+  // Have the payments partner send the user's address, document and selfie to
+  // the group's verification partner again, when it reports them missing and the user cannot re-submit.
   const resendInternational = async () => {
     if (!resendGroup) return;
     setResending(true);
@@ -201,7 +201,7 @@ export default function UserDetailPage() {
     try {
       const result = await api.post<KycRefreshResult>(`/admin/users/${id}/kyc/refresh`);
       // Show the fresh records straight away, then re-fetch the whole detail
-      // so the synced-at stamp and the Bridge snapshot agree with them.
+      // so the synced-at stamp and the partner snapshot agree with them.
       setDetail((current) => ({
         ...current,
         user: {

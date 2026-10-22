@@ -85,7 +85,7 @@ const describe = (draft: Draft, currency: string): string => {
 };
 
 /**
- * ZemFi's own fees, charged on top of whatever Dutchman Bridge charges.
+ * ZemFi's own fees, charged on top of whatever the payments partner charges.
  *
  * A rule does nothing until it is switched on, and every rule is created off
  * at zero — so this page is safe to open and edit, and only the "Charge this"
