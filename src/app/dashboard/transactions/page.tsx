@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PageHeader } from '../../../components/PageHeader';
@@ -10,7 +10,7 @@ import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Feedback';
 import { Table, TBody, Td, Th, THead, Tr, TableMessage } from '../../../components/ui/Table';
 import { api, friendlyErrorMessage, query } from '../../../lib/api';
-import { formatAmount, formatDateTime } from '../../../lib/format';
+import { formatAmount, formatCompactAmount, formatDateTime } from '../../../lib/format';
 import { useRequest } from '../../../lib/useRequest';
 import {
   TRANSACTION_KINDS,
@@ -20,6 +20,7 @@ import {
   type Page,
   type TransactionKind,
   type TransactionState,
+  type TransactionTotals,
 } from '../../../lib/types';
 
 const PAGE_SIZE = 25;
@@ -41,16 +42,36 @@ const dayStart = (day: string): string | undefined =>
 const dayEnd = (day: string): string | undefined =>
   day ? new Date(`${day}T23:59:59.999`).toISOString() : undefined;
 
-const params = (f: Filters, cursor?: string) =>
-  query({
-    q: f.q,
-    kind: f.kind || undefined,
-    status: f.status || undefined,
-    from: dayStart(f.from),
-    to: dayEnd(f.to),
-    limit: PAGE_SIZE,
-    cursor,
-  });
+const filterParams = (f: Filters) => ({
+  q: f.q,
+  kind: f.kind || undefined,
+  status: f.status || undefined,
+  from: dayStart(f.from),
+  to: dayEnd(f.to),
+});
+
+const params = (f: Filters, cursor?: string) => query({ ...filterParams(f), limit: PAGE_SIZE, cursor });
+
+/**
+ * "312 transactions · 280 completed: ₦4.2M, 1.3K USDT · 20 failed · …" --
+ * everything the filters match, not just the rows loaded so far.
+ */
+function TotalsLine({ totals, stale }: { totals: TransactionTotals; stale: boolean }) {
+  const parts: string[] = [];
+  const amounts = totals.completedAmounts.map((line) => formatCompactAmount(line.amount, line.currency)).join(', ');
+  parts.push(`${totals.completed.toLocaleString()} completed${amounts ? `: ${amounts}` : ''}`);
+  if (totals.failed) parts.push(`${totals.failed.toLocaleString()} failed`);
+  if (totals.reversed) parts.push(`${totals.reversed.toLocaleString()} reversed`);
+  if (totals.pending) parts.push(`${totals.pending.toLocaleString()} pending`);
+  return (
+    <p className={`mb-3 text-sm text-muted transition-opacity ${stale ? 'opacity-50' : ''}`} aria-live="polite">
+      <span className="font-semibold text-foreground">
+        {totals.total.toLocaleString()} {totals.total === 1 ? 'transaction' : 'transactions'}
+      </span>
+      {totals.total > 0 && ` · ${parts.join(' · ')}`}
+    </p>
+  );
+}
 
 /**
  * Every customer's transactions, from ZemFi's own book: what to look up when
@@ -68,6 +89,23 @@ export default function TransactionsPage() {
     [applied],
   );
   const { data: page, error, loading, setData } = useRequest(loadFirstPage, 'Could not load transactions.');
+  // The totals for the applied filters. The last ones stay up, dimmed, while
+  // new filters load; if they fail the list still shows, without the line.
+  const [totals, setTotals] = useState<{ for: Filters; totals: TransactionTotals } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    api.get<TransactionTotals>(`/admin/transactions/totals${query(filterParams(applied))}`).then(
+      (next) => {
+        if (!cancelled) setTotals({ for: applied, totals: next });
+      },
+      () => {
+        if (!cancelled) setTotals(null);
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [applied]);
   const rows = page?.items ?? [];
   const nextCursor = page?.nextCursor ?? null;
 
@@ -171,6 +209,8 @@ export default function TransactionsPage() {
           )}
         </div>
       </form>
+
+      {totals && <TotalsLine totals={totals.totals} stale={totals.for !== applied} />}
 
       {(error ?? moreError) && <Alert className="mb-4">{error ?? moreError}</Alert>}
 

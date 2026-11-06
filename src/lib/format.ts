@@ -62,6 +62,34 @@ export const formatAmount = (amount: string | number, currency: string): string 
   }
 };
 
+/**
+ * A money total in a few characters: "₦4.2M", "$12.5K", "1.3K USDT". The
+ * currency is whatever the total carries; a code Intl does not know (a
+ * stablecoin ticker) is appended instead of a symbol.
+ */
+export const formatCompactAmount = (amount: string | number, currency: string): string => {
+  const value = typeof amount === 'string' ? Number(amount) : amount;
+  if (!Number.isFinite(value)) return `${amount} ${currency}`;
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      currencyDisplay: 'narrowSymbol',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
+  } catch {
+    return `${formatCompactNumber(value)} ${currency}`;
+  }
+};
+
+/** 1,284 / 12.9K / 4.2M. */
+export const formatCompactNumber = (value: number): string =>
+  new Intl.NumberFormat(undefined, {
+    notation: value >= 10_000 ? 'compact' : 'standard',
+    maximumFractionDigits: 1,
+  }).format(value);
+
 export const fullName = (person: { firstName: string; lastName: string }): string =>
   `${person.firstName} ${person.lastName}`.trim() || '—';
 

@@ -102,6 +102,46 @@ export interface AdminTransaction {
   customer: { id: string; name: string; email: string; phoneNumber: string } | null;
 }
 
+/**
+ * How a transaction ended, as the backend's totals count it. Each transaction
+ * has exactly one, so they add up to the total:
+ * completed -- status COMPLETED; reversed -- FAILED because the payout came
+ * back (its last event was a reversal); failed -- FAILED and not reversed;
+ * pending -- not settled yet.
+ */
+export interface TransactionTotals {
+  total: number;
+  completed: number;
+  failed: number;
+  reversed: number;
+  pending: number;
+  /** Sum of completed amounts per currency, never added across currencies. */
+  completedAmounts: { currency: string; amount: string; count: number }[];
+  completedByKind: Record<TransactionKind, number>;
+}
+
+/** The Overview chart's window, in Lagos calendar days (today included). */
+export type SummaryWindow = '7' | '30' | '90';
+
+export interface SummaryPoint {
+  /** yyyy-mm-dd, a Lagos calendar day. */
+  date: string;
+  completed: number;
+  failed: number;
+  reversed: number;
+  /** Every transaction that day, pending ones included. */
+  total: number;
+}
+
+export interface TransactionsSummary {
+  days: number;
+  timeZone: string;
+  from: string;
+  series: SummaryPoint[];
+  window: TransactionTotals;
+  allTime: TransactionTotals;
+}
+
 export interface Page<T> {
   items: T[];
   nextCursor: string | null;
