@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { Card } from '../../components/ui/Card';
 import { Alert, Spinner } from '../../components/ui/Feedback';
 import { StatusBadge } from '../../components/ui/Badge';
+import { TransactionsOverview } from '../../components/TransactionsOverview';
 import { Table, TBody, Td, Th, THead, Tr, TableMessage } from '../../components/ui/Table';
 import { api, friendlyErrorMessage, query } from '../../lib/api';
 import { formatRelative, fullName, humanize } from '../../lib/format';
@@ -111,6 +112,8 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      <TransactionsOverview />
 
       <Card
         className="mt-8"
