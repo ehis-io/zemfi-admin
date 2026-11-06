@@ -70,6 +70,36 @@ export default function DashboardPage() {
     <>
       <PageHeader title="Overview" description="Where the product stands right now." />
 
+      {stats.activeCustomers && (
+        <>
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">
+            Active customers <span className="font-normal normal-case tracking-normal">· moved money</span>
+          </h2>
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {(
+              [
+                ['Last 7 days', stats.activeCustomers.last7Days, '7'],
+                ['Last 30 days', stats.activeCustomers.last30Days, '30'],
+                ['Last 90 days', stats.activeCustomers.last90Days, '90'],
+                ['All time', stats.activeCustomers.allTime, 'ever'],
+              ] as const
+            ).map(([label, value, window]) => (
+              <Link
+                key={label}
+                href={`/dashboard/users?active=${window}`}
+                className="card fade-in p-4 transition-colors hover:border-primary/60"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted">{label}</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">{value.toLocaleString()}</p>
+                <p className="text-xs text-muted">
+                  {stats.users > 0 ? `${Math.round((value / stats.users) * 100)}% of users` : '—'}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </>
+      )}
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {tiles.map((tile) => (
           <div key={tile.label} className="card fade-in p-4">
