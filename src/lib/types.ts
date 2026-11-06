@@ -110,6 +110,33 @@ export interface UserDetail {
   user: UserDetailRecord;
   bridge: BridgeSnapshot | null;
   bridgeError: string | null;
+  /** The referral code they signed up with, and whose it is. Absent from a
+   * server that predates referrals. */
+  referredBy?: ReferredBy | null;
+}
+
+/** A person a referral code belongs to. */
+export interface ReferralOwner {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ReferredBy {
+  code: string;
+  owner: ReferralOwner | null;
+  label: string | null;
+}
+
+/** A referral code: a customer's own (owner) or an agent/campaign code (label). */
+export interface ReferralCode {
+  id: string;
+  code: string;
+  owner: ReferralOwner | null;
+  label: string | null;
+  active: boolean;
+  signups: number;
+  createdAt: string;
 }
 
 export interface WithdrawalBankAccount {
