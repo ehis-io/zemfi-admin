@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the template, ignore real env files
 !.env.example
+
+# Local git worktrees, never part of the app
+.worktrees/
