@@ -14,6 +14,17 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   --radius: 0.75rem;
+
+  /* Chart series. The portal is dark-only, so these are the dark steps of
+   * one categorical set (blue, orange, aqua), checked for colour-blind
+   * separation and 3:1 contrast against --surface. Total is a neutral line:
+   * it is the sum the other three sit under, not a fourth category. */
+  --chart-completed: #199e70;
+  --chart-failed: #d95926;
+  --chart-reversed: #3987e5;
+  --chart-total: #cbd5e1;
+  --chart-grid: #222d40;
+  --chart-axis: #3a475c;
 }
 
 @theme inline {
@@ -29,6 +40,10 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-chart-completed: var(--chart-completed);
+  --color-chart-failed: var(--chart-failed);
+  --color-chart-reversed: var(--chart-reversed);
+  --color-chart-total: var(--chart-total);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }

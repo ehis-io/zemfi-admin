@@ -30,7 +30,116 @@ export interface Stats {
   usersLinkedToBridge: number;
   twoFactorEnabled: number;
   newUsersLast7Days: number;
+  /** Customers who moved money (a transaction that did not fail) in each
+   * window. Absent from a server that predates it. */
+  activeCustomers?: ActiveCustomers;
   tickets: TicketCounts;
+}
+
+export interface ActiveCustomers {
+  last7Days: number;
+  last30Days: number;
+  last90Days: number;
+  allTime: number;
+}
+
+/** The users list's activity filter: moved money in N days, or ever. */
+export type ActiveWindow = '7' | '30' | '90' | 'ever';
+
+export type TransactionKind =
+  | 'SELL'
+  | 'BUY'
+  | 'DEPOSIT'
+  | 'FUNDING'
+  | 'WITHDRAWAL'
+  | 'CRYPTO_SEND'
+  | 'GLOBAL_SEND';
+export type TransactionState = 'PENDING' | 'COMPLETED' | 'FAILED';
+
+export const TRANSACTION_KINDS: readonly TransactionKind[] = [
+  'FUNDING',
+  'WITHDRAWAL',
+  'DEPOSIT',
+  'CRYPTO_SEND',
+  'GLOBAL_SEND',
+  'BUY',
+  'SELL',
+];
+export const TRANSACTION_STATES: readonly TransactionState[] = ['PENDING', 'COMPLETED', 'FAILED'];
+
+/** How each kind reads in the portal. */
+export const TRANSACTION_KIND_LABEL: Record<TransactionKind, string> = {
+  FUNDING: 'Bank funding',
+  WITHDRAWAL: 'Withdrawal',
+  DEPOSIT: 'Crypto deposit',
+  CRYPTO_SEND: 'Crypto send',
+  GLOBAL_SEND: 'Send abroad',
+  BUY: 'Buy',
+  SELL: 'Sell',
+};
+
+export interface AdminTransaction {
+  id: string;
+  reference: string;
+  kind: TransactionKind;
+  status: TransactionState;
+  amount: string;
+  currency: string;
+  counterAmount: string | null;
+  counterCurrency: string | null;
+  fee: string | null;
+  partnerFee: string | null;
+  network: string | null;
+  txHash: string | null;
+  destination: string | null;
+  purpose: string | null;
+  purposeNote: string | null;
+  failureReason: string | null;
+  lastEvent: string;
+  occurredAt: string;
+  completedAt: string | null;
+  /** Null once the customer deleted their account. */
+  customer: { id: string; name: string; email: string; phoneNumber: string } | null;
+}
+
+/**
+ * How a transaction ended, as the backend's totals count it. Each transaction
+ * has exactly one, so they add up to the total:
+ * completed -- status COMPLETED; reversed -- FAILED because the payout came
+ * back (its last event was a reversal); failed -- FAILED and not reversed;
+ * pending -- not settled yet.
+ */
+export interface TransactionTotals {
+  total: number;
+  completed: number;
+  failed: number;
+  reversed: number;
+  pending: number;
+  /** Sum of completed amounts per currency, never added across currencies. */
+  completedAmounts: { currency: string; amount: string; count: number }[];
+  completedByKind: Record<TransactionKind, number>;
+}
+
+/** The Overview chart's window, in Lagos calendar days (today included). */
+export type SummaryWindow = '7' | '30' | '90';
+
+export interface SummaryPoint {
+  /** yyyy-mm-dd, a Lagos calendar day. */
+  date: string;
+  completed: number;
+  failed: number;
+  reversed: number;
+  /** Every transaction that day, pending ones included. */
+  total: number;
+}
+
+export interface TransactionsSummary {
+  days: number;
+  timeZone: string;
+  from: string;
+  series: SummaryPoint[];
+  window: TransactionTotals;
+  allTime: TransactionTotals;
 }
 
 export interface Page<T> {
@@ -49,6 +158,8 @@ export interface UserSummary {
   twoFactorEnabled: boolean;
   kycCacheSyncedAt: string | null;
   createdAt: string;
+  /** When they last moved money; null if never. Absent from an older server. */
+  lastActivityAt?: string | null;
 }
 
 export type KycLevel = 1 | 2 | 3;
@@ -110,6 +221,33 @@ export interface UserDetail {
   user: UserDetailRecord;
   bridge: BridgeSnapshot | null;
   bridgeError: string | null;
+  /** The referral code they signed up with, and whose it is. Absent from a
+   * server that predates referrals. */
+  referredBy?: ReferredBy | null;
+}
+
+/** A person a referral code belongs to. */
+export interface ReferralOwner {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ReferredBy {
+  code: string;
+  owner: ReferralOwner | null;
+  label: string | null;
+}
+
+/** A referral code: a customer's own (owner) or an agent/campaign code (label). */
+export interface ReferralCode {
+  id: string;
+  code: string;
+  owner: ReferralOwner | null;
+  label: string | null;
+  active: boolean;
+  signups: number;
+  createdAt: string;
 }
 
 export interface WithdrawalBankAccount {

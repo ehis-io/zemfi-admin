@@ -239,7 +239,7 @@ export default function UserDetailPage() {
     );
   }
 
-  const { user, bridge, bridgeError } = detail;
+  const { user, bridge, bridgeError, referredBy } = detail;
   const kycRecords: KycRecord[] = bridge?.kyc.records ?? user.kycRecords ?? [];
   const reverification = user.kycReverification ?? asReverification(bridge?.kyc.reverification);
 
@@ -285,6 +285,22 @@ export default function UserDetailPage() {
                     <span className="font-mono text-xs">{user.dutchmanCustomerId}</span>
                   ) : (
                     <Badge>Not linked</Badge>
+                  ),
+                },
+                {
+                  label: 'Referred by',
+                  value: referredBy ? (
+                    referredBy.owner ? (
+                      <Link href={`/dashboard/users/${referredBy.owner.id}`} className="text-primary-soft hover:underline">
+                        {referredBy.owner.name} <span className="font-mono text-xs text-muted">({referredBy.code})</span>
+                      </Link>
+                    ) : (
+                      <span>
+                        {referredBy.label ?? 'Agent code'} <span className="font-mono text-xs text-muted">({referredBy.code})</span>
+                      </span>
+                    )
+                  ) : (
+                    '—'
                   ),
                 },
                 { label: 'KYC synced', value: formatDateTime(user.kycCacheSyncedAt) },

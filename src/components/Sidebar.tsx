@@ -17,9 +17,11 @@ const LINKS: {
 }[] = [
   { href: '/dashboard', label: 'Overview', exact: true },
   { href: '/dashboard/users', label: 'Users' },
+  { href: '/dashboard/transactions', label: 'Transactions' },
   { href: '/dashboard/support', label: 'Support' },
   { href: '/dashboard/kyc', label: 'KYC' },
   { href: '/dashboard/features', label: 'Features' },
+  { href: '/dashboard/referrals', label: 'Referrals' },
   { href: '/dashboard/fees', label: 'Fees', ownerOnly: true },
   { href: '/dashboard/admins', label: 'Admins', ownerOnly: true },
   { href: '/dashboard/audit', label: 'Audit', ownerOnly: true },
