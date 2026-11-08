@@ -151,6 +151,8 @@ export interface UserSummary {
   id: string;
   email: string;
   firstName: string;
+  /** Null when they have none. Absent from an older server. */
+  middleName?: string | null;
   lastName: string;
   phoneNumber: string;
   country: string;

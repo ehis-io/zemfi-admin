@@ -90,8 +90,9 @@ export const formatCompactNumber = (value: number): string =>
     maximumFractionDigits: 1,
   }).format(value);
 
-export const fullName = (person: { firstName: string; lastName: string }): string =>
-  `${person.firstName} ${person.lastName}`.trim() || '—';
+/** First, middle (optional; absent from most lists) and last name. */
+export const fullName = (person: { firstName: string; middleName?: string | null; lastName: string }): string =>
+  [person.firstName, person.middleName, person.lastName].filter((part) => part?.trim()).join(' ') || '—';
 
 /** "AWAITING_USER" -> "Awaiting user". */
 export const humanize = (value: string): string => {
