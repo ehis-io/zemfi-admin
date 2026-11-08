@@ -160,6 +160,24 @@ export interface UserSummary {
   createdAt: string;
   /** When they last moved money; null if never. Absent from an older server. */
   lastActivityAt?: string | null;
+  /** Transactions in the list's period. Absent from an older server. */
+  transactions?: TxnStats;
+}
+
+/** How many transactions, and how much per currency (decimal strings). */
+export interface TxnStats {
+  count: number;
+  volume: Record<string, string>;
+}
+
+/** `period` on the user list: the window for transaction count and volume. */
+export type TxnPeriod = '30' | '90' | '180' | 'all';
+
+/** The user list: a page, its period, and every user's total for that period
+ * (first page only; null on later pages). */
+export interface UserPage extends Page<UserSummary> {
+  period?: TxnPeriod;
+  totals?: TxnStats | null;
 }
 
 export type KycLevel = 1 | 2 | 3;
