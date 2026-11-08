@@ -10,9 +10,9 @@ import { Button } from '../../../components/ui/Button';
 import { Alert } from '../../../components/ui/Feedback';
 import { Table, TBody, Td, Th, THead, Tr, TableMessage } from '../../../components/ui/Table';
 import { api, friendlyErrorMessage, query } from '../../../lib/api';
-import { formatDate, formatRelative, fullName } from '../../../lib/format';
+import { formatAmount, formatCompactAmount, formatDate, formatRelative, fullName } from '../../../lib/format';
 import { useRequest } from '../../../lib/useRequest';
-import type { ActiveWindow, Page, UserSummary } from '../../../lib/types';
+import type { ActiveWindow, TxnPeriod, TxnStats, UserPage } from '../../../lib/types';
 
 const ACTIVE_OPTIONS: { value: '' | ActiveWindow; label: string }[] = [
   { value: '', label: 'All users' },
@@ -24,6 +24,34 @@ const ACTIVE_OPTIONS: { value: '' | ActiveWindow; label: string }[] = [
 
 const isActiveWindow = (value: string | null): value is ActiveWindow =>
   value === '7' || value === '30' || value === '90' || value === 'ever';
+
+const PERIOD_OPTIONS: { value: TxnPeriod; label: string }[] = [
+  { value: '30', label: 'Last 30 days' },
+  { value: '90', label: 'Last 3 months' },
+  { value: '180', label: 'Last 6 months' },
+  { value: 'all', label: 'All time' },
+];
+const DEFAULT_PERIOD: TxnPeriod = '30';
+
+const isPeriod = (value: string | null): value is TxnPeriod => PERIOD_OPTIONS.some((option) => option.value === value);
+
+/** Non-zero volumes, one per currency. */
+const volumes = (stats: TxnStats) => Object.entries(stats.volume).filter(([, amount]) => Number(amount) !== 0);
+
+/** "₦4.2M" per currency, the exact amount on hover; "—" when nothing moved. */
+function Volume({ stats }: { stats: TxnStats }) {
+  const list = volumes(stats);
+  if (!list.length) return <span>—</span>;
+  return (
+    <>
+      {list.map(([currency, amount]) => (
+        <span key={currency} className="block" title={formatAmount(amount, currency)}>
+          {formatCompactAmount(amount, currency)}
+        </span>
+      ))}
+    </>
+  );
+}
 
 const PAGE_SIZE = 25;
 
@@ -47,28 +75,32 @@ function UsersList() {
   const [active, setActive] = useState<'' | ActiveWindow>(
     isActiveWindow(initialActive) ? initialActive : '',
   );
+  const initialPeriod = params.get('period');
+  const [period, setPeriod] = useState<TxnPeriod>(isPeriod(initialPeriod) ? initialPeriod : DEFAULT_PERIOD);
 
   // First page, re-run whenever the submitted search changes.
   const loadFirstPage = useCallback(
     () =>
-      api.get<Page<UserSummary>>(
-        `/admin/users${query({ q: submitted, active: active || undefined, limit: PAGE_SIZE })}`,
-      ),
-    [submitted, active],
+      api.get<UserPage>(`/admin/users${query({ q: submitted, active: active || undefined, period, limit: PAGE_SIZE })}`),
+    [submitted, active, period],
   );
   const { data: page, error, loading: isLoading, setData } = useRequest(loadFirstPage, 'Could not load users.');
   const users = page?.items ?? [];
   const nextCursor = page?.nextCursor ?? null;
+  // Every user's total for the period; it comes with the first page.
+  const totals = page?.totals ?? null;
+  const periodLabel = PERIOD_OPTIONS.find((option) => option.value === period)?.label.toLowerCase();
 
   const loadMore = async () => {
     if (!nextCursor) return;
     setIsLoadingMore(true);
     setMoreError(null);
     try {
-      const next = await api.get<Page<UserSummary>>(
-        `/admin/users${query({ q: submitted, active: active || undefined, limit: PAGE_SIZE, cursor: nextCursor })}`,
+      const next = await api.get<UserPage>(
+        `/admin/users${query({ q: submitted, active: active || undefined, period, limit: PAGE_SIZE, cursor: nextCursor })}`,
       );
-      setData((current) => ({ items: [...current.items, ...next.items], nextCursor: next.nextCursor }));
+      // Keep the first page's totals: later pages do not carry them.
+      setData((current) => ({ ...current, items: [...current.items, ...next.items], nextCursor: next.nextCursor }));
     } catch (err: unknown) {
       setMoreError(friendlyErrorMessage(err, 'Could not load more users.'));
     } finally {
@@ -78,7 +110,10 @@ function UsersList() {
 
   return (
     <>
-      <PageHeader title="Users" description="Everyone with a ZemFi account." />
+      <PageHeader
+        title="Users"
+        description="Everyone with a ZemFi account. Transactions and volume count every transaction that did not fail in the chosen period; volume is the amount, per currency, before fees."
+      />
 
       <form
         className="mb-4 flex gap-2"
@@ -110,12 +145,38 @@ function UsersList() {
             </option>
           ))}
         </select>
+        <select
+          aria-label="Transactions period"
+          className="input-field max-w-[12rem]"
+          value={period}
+          onChange={(event) => setPeriod(isPeriod(event.target.value) ? event.target.value : DEFAULT_PERIOD)}
+        >
+          {PERIOD_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </form>
+
+      {totals && (
+        <p className="mb-3 text-sm text-muted">
+          All users, {periodLabel}:{' '}
+          <span className="font-semibold text-foreground">{totals.count.toLocaleString()}</span>{' '}
+          {totals.count === 1 ? 'transaction' : 'transactions'}
+          {volumes(totals).map(([currency, amount]) => (
+            <span key={currency} title={formatAmount(amount, currency)}>
+              {' · '}
+              <span className="font-semibold text-foreground">{formatCompactAmount(amount, currency)}</span> volume
+            </span>
+          ))}
+        </p>
+      )}
 
       {(error ?? moreError) && <Alert className="mb-4">{error ?? moreError}</Alert>}
 
       <Card>
-        <Table minWidth={920}>
+        <Table minWidth={1100}>
           <THead>
             <Th>Name</Th>
             <Th>Email</Th>
@@ -123,13 +184,15 @@ function UsersList() {
             <Th>Country</Th>
             <Th>Partner</Th>
             <Th>2FA</Th>
+            <Th className="text-right">Transactions</Th>
+            <Th className="text-right">Volume</Th>
             <Th>Last activity</Th>
             <Th className="text-right">Joined</Th>
           </THead>
           <TBody>
-            {isLoading && <TableMessage colSpan={8}>Loading users…</TableMessage>}
+            {isLoading && <TableMessage colSpan={10}>Loading users…</TableMessage>}
             {!isLoading && users.length === 0 && (
-              <TableMessage colSpan={8}>
+              <TableMessage colSpan={10}>
                 {submitted
                   ? `No users match "${submitted}".`
                   : active
@@ -157,6 +220,12 @@ function UsersList() {
                   </Td>
                   <Td>
                     {user.twoFactorEnabled ? <Badge tone="info">On</Badge> : <Badge tone="neutral">Off</Badge>}
+                  </Td>
+                  <Td className="text-right tabular-nums">
+                    {user.transactions ? user.transactions.count.toLocaleString() : '—'}
+                  </Td>
+                  <Td className="whitespace-nowrap text-right tabular-nums text-muted">
+                    {user.transactions ? <Volume stats={user.transactions} /> : '—'}
                   </Td>
                   <Td className="whitespace-nowrap text-muted" >
                     {user.lastActivityAt ? formatRelative(user.lastActivityAt) : 'Never'}
